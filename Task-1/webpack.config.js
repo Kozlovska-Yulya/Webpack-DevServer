@@ -2,7 +2,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = (env, argv) => {
-  const isProduction = argv.mode === 'production';
   const config = {
     entry: './src/index.js',
     output: {
@@ -13,7 +12,9 @@ module.exports = (env, argv) => {
         {
           test: /\.s?css$/i,
           use: [
-            isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
+            argv.mode === 'production'
+              ? MiniCssExtractPlugin.loader
+              : 'style-loader',
             'css-loader',
             'sass-loader',
           ],
@@ -24,7 +25,7 @@ module.exports = (env, argv) => {
             {
               loader: 'url-loader',
               options: {
-                outPutPath: 'images',
+                outputPath: 'images',
                 limit: 8192,
               },
             },
@@ -34,18 +35,19 @@ module.exports = (env, argv) => {
     },
     plugins: [
       new HtmlWebpackPlugin({
+        filename: 'index.html',
         template: './src/index.html',
       }),
     ],
-
     devServer: {
       port: 9000,
       hot: true,
     },
   };
-  if (isProduction) {
+
+  if (argv.mode === 'production') {
     config.plugins.push(
-      MiniCssExtractPlugin({
+      new MiniCssExtractPlugin({
         filename: '[name].css',
       })
     );
